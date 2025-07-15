@@ -21,45 +21,127 @@ Crypto Sentinel est un assistant IA autonome qui surveille en temps réel le lan
 - **Monitoring** : APScheduler, Logging
 - **DevOps** : Docker, Azure App Service
 
-## 📦 Installation
+## 🚀 Installation
 
 ### Prérequis
 - Python 3.11+
-- MongoDB Atlas account
-- Alchemy/Infura API key
-- OpenAI API key
-- Telegram Bot Token
-- Git
+- MongoDB (Atlas ou local)
+- Redis (optionnel, pour le cache)
+- Docker & Docker Compose (pour déploiement)
+- Clés API requises :
+  - OpenAI API Key
+  - Alchemy/Infura API Key
+  - Telegram Bot Token
+  - Dexscreener API (optionnel)
+  - Twitter API (optionnel)
 
-### Étapes d'installation
-1. **Cloner le repository**
-   ```bash
-   git clone <repository-url>
-   cd crypto-sentinel
-   ```
+### Installation Rapide avec Docker
 
-2. **Créer l'environnement virtuel**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   # source venv/bin/activate  # Linux/Mac
-   ```
+#### 🚀 Script de Démarrage Automatique
 
-3. **Installer les dépendances**
-   ```bash
-   pip install -r requirements.txt
-   ```
+**Linux/Mac :**
+```bash
+# 1. Cloner le repository
+git clone <repository-url>
+cd crypto-sentinel
 
-4. **Configurer l'environnement**
-   ```bash
-   cp .env.example .env
-   # Éditer .env avec vos clés API
-   ```
+# 2. Lancer le script de démarrage
+chmod +x start.sh
+./start.sh
+```
 
-5. **Lancer l'application**
-   ```bash
-   python app/main.py
-   ```
+**Windows (PowerShell) :**
+```powershell
+# 1. Cloner le repository
+git clone <repository-url>
+cd crypto-sentinel
+
+# 2. Lancer le script de démarrage
+.\start.ps1
+```
+
+#### 📋 Installation Manuelle
+
+```bash
+# 1. Cloner le repository
+git clone <repository-url>
+cd crypto-sentinel
+
+# 2. Configurer les variables d'environnement
+cp .env.example .env
+# Éditer .env avec vos clés API
+
+# 3. Lancer avec Docker Compose
+docker-compose up -d
+
+# 4. Vérifier le statut
+curl http://localhost:8000/health
+```
+
+### Installation Manuelle
+
+```bash
+# 1. Cloner et configurer
+git clone <repository-url>
+cd crypto-sentinel
+cp .env.example .env
+
+# 2. Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate     # Windows
+
+# 3. Installer les dépendances
+pip install -r requirements.txt
+
+# 4. Configurer MongoDB (local)
+# Installer MongoDB Community Edition
+# Créer la base de données : crypto_sentinel
+
+# 5. Lancer l'application
+python -m app.main
+```
+
+### Configuration des Variables d'Environnement
+
+Éditer le fichier `.env` :
+
+```env
+# Application
+APP_NAME=Crypto Sentinel
+ENVIRONMENT=development
+LOG_LEVEL=INFO
+
+# Base de données
+MONGODB_URL=mongodb://localhost:27017/crypto_sentinel
+REDIS_URL=redis://localhost:6379/0
+
+# Ethereum
+ALCHEMY_API_KEY=your_alchemy_key
+INFURA_API_KEY=your_infura_key
+ETHEREUM_NETWORK=mainnet
+
+# Intelligence Artificielle
+OPENAI_API_KEY=your_openai_key
+OPENAI_MODEL=gpt-4
+OPENAI_MAX_TOKENS=1000
+
+# Telegram
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+ENABLE_TELEGRAM_NOTIFICATIONS=true
+
+# APIs externes (optionnel)
+DEXSCREENER_API_KEY=your_dexscreener_key
+TWITTER_BEARER_TOKEN=your_twitter_bearer
+ENABLE_TWITTER_MONITORING=false
+
+# Seuils d'analyse
+MIN_NOTIFICATION_SCORE=7.0
+MIN_LIQUIDITY_USD=10000
+MAX_TOKEN_AGE_HOURS=24
+```
 
 ## 🏗️ Architecture
 
@@ -106,6 +188,172 @@ Crypto Sentinel Architecture
 - [API.md](docs/API.md) - Documentation des endpoints FastAPI
 - [DEPLOYMENT.md](docs/DEPLOYMENT.md) - Guide de déploiement Azure
 - [SECURITY.md](docs/SECURITY.md) - Bonnes pratiques de sécurité
+
+## 📊 Utilisation
+
+### Démarrage Rapide
+
+1. **Lancer l'application**
+   ```bash
+   # Avec Docker
+   docker-compose up -d
+   
+   # Ou manuellement
+   python -m app.main
+   ```
+
+2. **Vérifier le fonctionnement**
+   ```bash
+   # Santé de l'application
+   curl http://localhost:8000/health
+   
+   # Statistiques système
+   curl http://localhost:8000/stats
+   ```
+
+3. **Accéder aux interfaces**
+   - **API Documentation** : http://localhost:8000/docs
+   - **Health Check** : http://localhost:8000/health
+   - **Monitoring** : http://localhost:3000 (Grafana, si activé)
+
+### API Endpoints
+
+#### Endpoints Principaux
+
+```http
+# Page d'accueil
+GET /
+
+# Santé de l'application
+GET /health
+Response: {
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "services": {
+    "database": "connected",
+    "websocket": "active",
+    "gpt_analyzer": "ready"
+  }
+}
+
+# Statistiques système
+GET /stats
+Response: {
+  "tokens_analyzed_today": 156,
+  "high_score_tokens": 12,
+  "notifications_sent": 8,
+  "uptime_hours": 24.5,
+  "gpt_tokens_used": 45000,
+  "estimated_cost_usd": 2.25
+}
+```
+
+#### Endpoints d'Analyse
+
+```http
+# Récupérer les analyses récentes
+GET /api/analyses/recent?limit=10
+Response: [
+  {
+    "id": "507f1f77bcf86cd799439011",
+    "token_info": {
+      "contract_address": "0x...",
+      "name": "NewToken",
+      "symbol": "NEW",
+      "total_supply": 1000000,
+      "decimals": 18,
+      "created_at": "2024-01-15T10:00:00Z"
+    },
+    "ai_analysis": {
+      "overall_score": 8.5,
+      "recommendation": "BUY",
+      "confidence": 0.85,
+      "reasoning": "Token shows strong fundamentals..."
+    },
+    "analyzed_at": "2024-01-15T10:05:00Z"
+  }
+]
+
+# Récupérer les analyses avec score élevé
+GET /api/analyses/high-score?min_score=7.0&limit=5
+
+# Récupérer une analyse spécifique
+GET /api/analyses/{analysis_id}
+```
+
+### Notifications Telegram
+
+#### Configuration du Bot
+
+1. **Créer un bot Telegram**
+   - Contacter @BotFather sur Telegram
+   - Créer un nouveau bot : `/newbot`
+   - Récupérer le token
+
+2. **Configurer le chat**
+   ```bash
+   # Trouver votre chat ID
+   curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates"
+   ```
+
+3. **Format des notifications**
+   ```
+   🚀 NOUVEAU TOKEN DÉTECTÉ
+   
+   📊 Score: 8.5/10 ⭐
+   💎 Token: NewToken (NEW)
+   📍 Contrat: 0x1234...5678
+   💰 Liquidité: $45,000
+   
+   🤖 Analyse IA:
+   Token shows strong fundamentals with innovative use case...
+   
+   ⚠️ Risques: Medium
+   🎯 Recommandation: BUY
+   🔗 Dexscreener: https://dexscreener.com/ethereum/0x1234...5678
+   ```
+
+### Monitoring et Logs
+
+#### Logs de l'Application
+
+```bash
+# Suivre les logs en temps réel
+docker-compose logs -f crypto-sentinel
+
+# Logs spécifiques
+tail -f logs/crypto_sentinel.log
+tail -f logs/websocket.log
+tail -f logs/gpt_analyzer.log
+```
+
+#### Métriques Importantes
+
+- **Tokens détectés/heure** : Nombre de nouveaux tokens identifiés
+- **Analyses réussies** : Pourcentage d'analyses GPT complétées
+- **Notifications envoyées** : Nombre d'alertes Telegram
+- **Coût GPT** : Estimation des coûts OpenAI
+- **Uptime services** : Disponibilité des composants
+
+### Commandes Utiles
+
+```bash
+# Développement
+python -m pytest tests/                    # Exécuter les tests
+python -m pytest tests/ -v --cov=app      # Tests avec couverture
+black app/ tests/                          # Formatter le code
+mypy app/                                  # Vérification des types
+
+# Production
+docker-compose up -d                       # Lancer en arrière-plan
+docker-compose down                         # Arrêter les services
+docker-compose logs -f crypto-sentinel     # Suivre les logs
+docker-compose restart crypto-sentinel     # Redémarrer l'app
+
+# Maintenance
+docker system prune                        # Nettoyer Docker
+docker-compose pull                         # Mettre à jour les images
+```
 
 ## 🧪 Tests
 ```bash
